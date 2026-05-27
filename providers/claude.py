@@ -4,23 +4,43 @@ from providers.base import BaseProvider, ProviderState
 
 
 class ClaudeProvider(BaseProvider):
+    def __init__(self, config: dict):
+        self.binary = config.get("binary_path", "claude")
+
     def fetch(self) -> ProviderState:
-        state = ProviderState(name="Claude Code Pro", provider_type="burst")
+        state = ProviderState(name="Claude Code", provider_type="burst")
         try:
             result = subprocess.run(
-                ["ccusage", "claude", "daily", "--json"],
-                capture_output=True, text=True, timeout=15
+                [self.binary, "--print-json"],
+                capture_output=True, text=True, timeout=10
             )
             data = json.loads(result.stdout)
-            state.window_pct_used = data.get("usage_pct")
-            state.window_resets_in = data.get("resets_in")
+            root = data.get("quota") or data.get("usage") or data.get("rate_limits") or data.get("oauth_usage") or data
+
+            five_hr = root.get("five_hour") or root.get("fiveHour") or {}
+            used_pct = _parse_pct(five_hr)
+            if used_pct is not None:
+                state.window_pct_used = 100.0 - used_pct
+                state.window_resets_in = _parse_reset(five_hr)
         except (FileNotFoundError, subprocess.TimeoutExpired, json.JSONDecodeError, KeyError):
-            print("ccusage not available. Enter usage % manually:")
-            try:
-                pct = float(input(" 5hr window usage %: "))
-                state.window_pct_used = pct
-                reset = input(" Resets in (e.g. '2h 15m'): ")
-                state.window_resets_in = reset
-            except (ValueError, EOFError):
-                state.status = "critical"
+            state.status = "critical"
         return state
+
+
+def _parse_pct(window: dict) -> float | None:
+    for key in ("utilization", "used_percentage", "usedPercentage", "used_percent", "usedPercent", "percent_used", "percentUsed"):
+        val = window.get(key)
+        if val is not None:
+            try:
+                return float(val)
+            except (ValueError, TypeError):
+                pass
+    return None
+
+
+def _parse_reset(window: dict) -> str | None:
+    for key in ("resets_at", "resetsAt", "reset_at", "resetAt"):
+        val = window.get(key)
+        if val:
+            return str(val)
+    return None

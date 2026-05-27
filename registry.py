@@ -1,5 +1,7 @@
+import shutil
 from typing import Callable
 from providers.base import BaseProvider
+from providers.claude import ClaudeProvider
 
 
 class ProviderDef:
@@ -19,3 +21,10 @@ def register(pid: str, name: str, probe: Callable[[], bool], requires_auth: bool
         REGISTRY.append(ProviderDef(pid, name, probe, factory, requires_auth))
         return factory
     return wrapper
+
+
+register(
+    pid="claude",
+    name="Claude Code",
+    probe=lambda: shutil.which("claude") is not None,
+)(lambda config: ClaudeProvider(config.get("claude", {})))
