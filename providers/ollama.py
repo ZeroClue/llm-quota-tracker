@@ -12,6 +12,9 @@ class OllamaProvider(BaseProvider):
 
     def fetch(self) -> ProviderState:
         state = ProviderState(name="Ollama Cloud Pro", provider_type="burst")
+        if not self.cookie:
+            state.status = "needs-auth"
+            return state
         try:
             resp = requests.get(
                 OLLAMA_URL,
@@ -23,13 +26,10 @@ class OllamaProvider(BaseProvider):
             text = soup.get_text()
             state.window_pct_used = self._extract_pct(text, "Session usage")
             state.window_resets_in = self._extract_reset(text)
+            if state.window_pct_used is None:
+                state.status = "needs-auth"
         except requests.RequestException:
-            print("Ollama scrape failed (cookie expired?). Enter manually:")
-            try:
-                state.window_pct_used = float(input(" Session usage %: "))
-                state.window_resets_in = input(" Resets in: ")
-            except (ValueError, EOFError):
-                state.status = "critical"
+            state.status = "needs-auth"
         return state
 
     @staticmethod
