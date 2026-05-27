@@ -35,11 +35,13 @@ class OllamaProvider(BaseProvider):
     @staticmethod
     def _extract_pct(text: str, label: str) -> float | None:
         import re
-        for line in text.splitlines():
+        lines = text.splitlines()
+        for i, line in enumerate(lines):
             if label in line:
-                m = re.search(r"(\d+(?:\.\d+)?)\s*%", line)
-                if m:
-                    return float(m.group(1))
+                for j in range(i, min(i + 3, len(lines))):
+                    m = re.search(r"(\d+(?:\.\d+)?)\s*%", lines[j])
+                    if m:
+                        return float(m.group(1))
         return None
 
     @staticmethod

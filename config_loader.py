@@ -50,7 +50,9 @@ def resolve_providers(config: dict) -> list:
         if pid not in seen:
             for p in REGISTRY:
                 if p.id == pid:
-                    raw = config.get(pid, {})
+                    raw = config.get(pid) or config.get(
+                        next((k for k, v in CONFIG_KEY_MAP.items() if v == pid), ""), {}
+                    ) or {}
                     provider = p.factory(raw if isinstance(raw, dict) else {})
                     active.append(provider)
                     break
