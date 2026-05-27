@@ -1,6 +1,6 @@
 import re
 import requests
-from providers.base import BaseProvider, ProviderState
+from providers.base import BaseProvider, ProviderState, QuotaWindow
 
 
 DASHBOARD_URL = "https://opencode.ai/workspace/{workspace_id}/go"
@@ -27,6 +27,15 @@ def _parse_windows(html: str) -> dict[str, dict]:
     return windows
 
 
+def _fmt_reset(secs: float) -> str:
+    if secs < 3600:
+        return f"{int(secs // 60)}m"
+    elif secs < 86400:
+        return f"{int(secs // 3600)}h {int((secs % 3600) // 60)}m"
+    else:
+        return f"{int(secs // 86400)}d"
+
+
 class OpenCodeProvider(BaseProvider):
     def __init__(self, workspace_id: str = "", auth_cookie: str = "", api_key: str = ""):
         self.workspace_id = workspace_id
@@ -49,15 +58,24 @@ class OpenCodeProvider(BaseProvider):
                 timeout=15,
             )
             resp.raise_for_status()
-            windows = _parse_windows(resp.text)
-            monthly = windows.get("monthlyUsage")
+            raw = _parse_windows(resp.text)
+            monthly = raw.get("monthlyUsage")
             if monthly:
                 pct_used = monthly["usagePercent"]
                 reset_sec = monthly["resetInSec"]
-                state = ProviderState(name="OpenCode Go", provider_type="budget")
+                state = ProviderState(name="OpenCode Go", provider_type="budget", unit="%")
                 state.remaining_quota = 100.0 - pct_used
                 state.total_quota = 100.0
                 state.days_until_reset = max(1, int(reset_sec / 86400))
+
+                for key, label in [("rollingUsage", "Rolling"), ("weeklyUsage", "Weekly")]:
+                    w = raw.get(key)
+                    if w:
+                        state.windows.append(QuotaWindow(
+                            label=label,
+                            pct_used=w["usagePercent"],
+                            resets_in=_fmt_reset(w["resetInSec"]),
+                        ))
                 return state
         except requests.RequestException:
             pass

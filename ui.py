@@ -36,4 +36,10 @@ def render(providers: list[ProviderState]):
 
         table.add_row(p.name, f"[{status_style}]{p.status}[/{status_style}]", details)
 
+        for w in p.windows:
+            w_details = f"{w.label}: {w.pct_used:.0f}% used" if w.pct_used is not None else f"{w.label}: N/A"
+            if w.resets_in:
+                w_details += f" · resets {w.resets_in}"
+            table.add_row("", "", w_details)
+
     console.print(table)
