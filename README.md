@@ -1,14 +1,17 @@
 # LLM Quota Tracker
 
-A terminal dashboard that monitors multiple LLM subscriptions in one place. See how much quota you have left, your daily allowance, and whether you're spending too fast — across Claude Code Pro, OpenCode Go, Ollama Cloud Pro, and Zai GLM.
+A terminal dashboard that auto-discovers your AI coding tools and shows all your quotas, daily allowances, and usage windows in one place.
+
+Supports Claude Code Pro, OpenCode Go, Ollama Cloud Pro, Zai GLM, and extensible to more.
 
 ## Features
 
-- **Unified dashboard** — single `rich` table showing all providers at once
-- **Two quota models** — "budget" (monthly cap) and "burst" (rolling window)
-- **Daily allowance math** — remaining ÷ days until reset tells you your safe daily spend
-- **Pace tracking** — trailing 7-day average from SQLite history warns if you're overspending
-- **Three-tier data fetching** — API/CLI → web scrape → manual input, falls back gracefully
+- **Auto-discovery** — detects installed tools via `which`, known paths, and credential files
+- **Unified dashboard** — single `rich` table showing all providers with color-coded status
+- **Multi-window display** — each provider shows all its quota windows (5h, weekly, monthly, MCP)
+- **Daily allowance** — remaining ÷ days until reset tells you your safe daily spend
+- **Pace tracking** — SQLite history tracks day-over-day usage, warns on overspend
+- **No manual prompts** — missing credentials show "needs auth" gracefully
 - **No cloud dependencies** — all state lives in `~/.config/llm-tracker/`
 
 ## Requirements
@@ -19,30 +22,10 @@ A terminal dashboard that monitors multiple LLM subscriptions in one place. See 
 ## Installation
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/ZeroClue/llm-quota-tracker.git
 cd llm-quota-tracker
 uv sync
 ```
-
-## Configuration
-
-Create `~/.config/llm-tracker/config.yaml` or a local `config.yaml`:
-
-```yaml
-opencode_go:
-  billing_cycle_start: "2026-05-01"
-
-ollama_cloud:
-  cookie: "your_ollama_session_cookie"
-
-claude_code:
-  use_ccusage: true
-
-zai_glm:
-  api_key: ""
-```
-
-All fields are optional — providers without config still prompt for manual input.
 
 ## Usage
 
@@ -50,40 +33,60 @@ All fields are optional — providers without config still prompt for manual inp
 uv run llm-tracker
 ```
 
-Providers appear in the dashboard automatically. If a data source is unavailable, you'll be prompted for input.
+Providers are auto-detected. Claude and OpenCode Go appear automatically if installed. Configure credentials for others in `~/.config/llm-tracker/config.yaml`:
+
+```yaml
+# OpenCode Go — get workspace_id and auth_cookie from browser DevTools
+opencode_go:
+  workspace_id: "wrk_xxxxxxxx"
+  auth_cookie: "Fe26.2****"
+
+# Ollama Cloud Pro — paste full Cookie header from browser Network tab
+ollama_cloud:
+  cookie: "__Secure_session=...; aid=..."
+
+# Zai GLM — API key from account settings
+zai_glm:
+  api_key: "your_key"
+```
+
+### Auto-discovered providers
+
+| Provider | What's detected | Data source |
+|----------|---------------|-------------|
+| Claude Code | `~/.claude*` directories | `claude auth status` + OAuth usage API |
+| OpenCode Go | `which opencode` | Dashboard scrape with workspace_id + auth cookie |
+| Ollama Cloud Pro | Config only | Web scrape `ollama.com/settings` with cookie |
+| Zai GLM | Config only | API at `api.z.ai/api/monitor/usage/quota/limit` |
 
 ## Supported Providers
 
-| Provider | Model | Data Source | Unit |
-|----------|-------|-------------|------|
-| Claude Code Pro | Burst (5hr window) | `ccusage` CLI or manual | % |
-| OpenCode Go | Budget ($60/mo) | Manual input | $ |
-| Ollama Cloud Pro | Burst (session/weekly) | Web scrape `ollama.com/settings` or manual | % |
-| Zai GLM | Hybrid (30-day + 5hr burst) | Manual input | tokens |
+All providers show their quota windows when configured:
+
+| Provider | Windows | Plan |
+|----------|---------|------|
+| Claude Code | 5h + 7d | Pro detected via OAuth |
+| OpenCode Go | 5h + Weekly + Monthly | $60/mo budget (configurable) |
+| Ollama Cloud Pro | Session + Weekly | Cloud Pro |
+| Zai GLM | 5h + Weekly + MCP | Pro via API |
 
 ## Architecture
 
 ```
-main.py             — Entry point: wires config → providers → history → calculator → UI
-config_loader.py    — Reads config.yaml from ~/.config/llm-tracker/ or local dir
-providers/base.py   — ProviderState dataclass + BaseProvider ABC
-providers/claude.py — Claude Code Pro (burst, ccsage CLI)
-providers/opencode.py — OpenCode Go (budget, manual input)
-providers/ollama.py — Ollama Cloud Pro (burst, web scrape)
-providers/zai.py    — Zai GLM (hybrid, manual input)
-calculators.py      — Pure functions: calculate_budget(), calculate_burst()
-history.py          — SQLite daily snapshots for pace calculation
-ui.py               — Rich table dashboard with color-coded status
+registry.py         — Static provider definitions with probe functions
+discovery.py        — Scanner probes which, paths, env vars
+config_loader.py    — Merges discovery results with config.yaml overrides
+providers/base.py   — ProviderState dataclass + BaseProvider ABC + QuotaWindow
+providers/claude.py — Claude Code (OAuth usage API)
+providers/opencode.py — OpenCode Go (SolidJS hydration regex scrape)
+providers/ollama.py — Ollama Cloud Pro (BeautifulSoup scrape)
+providers/zai.py    — Zai GLM (REST API)
+calculators.py      — calculate_budget() + calculate_burst()
+history.py          — SQLite daily snapshots for pace
+ui.py               — Rich table with color-coded status + guidance
 ```
 
-Status colors: green (on track), yellow (warning), red (critical / over limit).
-
-## Guiding Principles
-
-- **Directionally correct** — a good estimate beats no data
-- **Data first, UI second** — get numbers into ProviderState, format later
-- **Fallback gracefully** — API → scrape → manual input, never leave the user with nothing
-- **Local-only** — credentials in `config.yaml`, history in SQLite, nothing in the cloud
+Status colors: green (on track), yellow (over pace), red (critical / limit reached).
 
 ## Development
 
@@ -93,3 +96,7 @@ uv run python      # run scripts
 ```
 
 No test or lint infrastructure yet.
+
+## License
+
+MIT
