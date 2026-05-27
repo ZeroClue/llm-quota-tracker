@@ -12,6 +12,9 @@ def render(providers: list[ProviderState]):
     table.add_column("Details")
 
     for p in providers:
+        if p.status == "needs-auth":
+            table.add_row(p.name, "[yellow]needs auth[/yellow]", "Install or configure this provider")
+            continue
         status_style = {"ok": "green", "warning": "yellow", "critical": "red"}.get(p.status, "white")
         sep = "" if p.unit in ("$", "%") else " "
         if p.provider_type == "budget":
