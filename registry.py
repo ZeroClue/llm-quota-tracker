@@ -29,11 +29,7 @@ register(
     pid="claude",
     name="Claude Code",
     probe=lambda: shutil.which("claude") is not None,
-)(lambda config: ClaudeProvider(config.get("claude", {})))
-
-
-from providers.opencode import OpenCodeProvider
-
+)(lambda config: ClaudeProvider(config))
 
 register(
     pid="opencode_go",
@@ -43,9 +39,9 @@ register(
         and os.environ.get("OPENCODE_GO_AUTH_COOKIE", "") != ""
     ),
     requires_auth=True,
-)(lambda config: OpenCodeProvider(
-    config.get("opencode_go", {}).get("workspace_id") or os.environ.get("OPENCODE_GO_WORKSPACE_ID", ""),
-    config.get("opencode_go", {}).get("auth_cookie") or os.environ.get("OPENCODE_GO_AUTH_COOKIE", ""),
+)(lambda config: __import__("providers.opencode", fromlist=["OpenCodeProvider"]).OpenCodeProvider(
+    config.get("workspace_id") or os.environ.get("OPENCODE_GO_WORKSPACE_ID", ""),
+    config.get("auth_cookie") or os.environ.get("OPENCODE_GO_AUTH_COOKIE", ""),
 ))
 
 register(
@@ -53,32 +49,32 @@ register(
     name="GitHub Copilot",
     probe=lambda: probe_path("~/.config/opencode/auth.json"),
     requires_auth=True,
-)(lambda config: __import__("providers.copilot", fromlist=["CopilotProvider"]).CopilotProvider(config.get("copilot", {})))
+)(lambda config: __import__("providers.copilot", fromlist=["CopilotProvider"]).CopilotProvider(config))
 
 register(
     pid="cursor",
     name="Cursor",
     probe=lambda: probe_path("~/.config/cursor"),
     requires_auth=True,
-)(lambda config: __import__("providers.cursor", fromlist=["CursorProvider"]).CursorProvider(config.get("cursor", {})))
+)(lambda config: __import__("providers.cursor", fromlist=["CursorProvider"]).CursorProvider(config))
 
 register(
     pid="openai",
     name="OpenAI",
     probe=lambda: probe_path("~/.config/opencode/auth.json"),
     requires_auth=True,
-)(lambda config: __import__("providers.openai", fromlist=["OpenAIProvider"]).OpenAIProvider(config.get("openai", {})))
+)(lambda config: __import__("providers.openai", fromlist=["OpenAIProvider"]).OpenAIProvider(config))
 
 register(
     pid="ollama",
     name="Ollama Cloud Pro",
     probe=lambda: False,
     requires_auth=True,
-)(lambda config: __import__("providers.ollama", fromlist=["OllamaProvider"]).OllamaProvider(config.get("ollama_cloud", {}).get("cookie", "")))
+)(lambda config: __import__("providers.ollama", fromlist=["OllamaProvider"]).OllamaProvider(config.get("cookie", "")))
 
 register(
     pid="zai",
     name="Zai GLM",
     probe=lambda: False,
     requires_auth=True,
-)(lambda config: __import__("providers.zai", fromlist=["ZaiProvider"]).ZaiProvider(config.get("zai_glm", {}).get("api_key", "")))
+)(lambda config: __import__("providers.zai", fromlist=["ZaiProvider"]).ZaiProvider(config.get("api_key", "")))

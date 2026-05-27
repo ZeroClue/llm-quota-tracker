@@ -11,10 +11,16 @@ def load_config() -> dict:
     path = LOCAL_CONFIG_PATH if LOCAL_CONFIG_PATH.exists() else CONFIG_PATH
     if not path.exists():
         print(f"Config not found at {path}")
-        print("Run 'llm-tracker setup' to create one.")
+        print("Create a config.yaml to configure Ollama/Zai providers.")
         return {}
     with open(path) as f:
         return yaml.safe_load(f) or {}
+
+
+CONFIG_KEY_MAP = {
+    "ollama_cloud": "ollama",
+    "zai_glm": "zai",
+}
 
 
 def resolve_providers(config: dict) -> list:
@@ -22,7 +28,7 @@ def resolve_providers(config: dict) -> list:
 
     from discovery import scan
     discovered = {p.id: p for p in scan()}
-    configured = set(config.keys())
+    configured = {CONFIG_KEY_MAP.get(k, k) for k in config.keys()}
 
     active = []
     seen = set()
@@ -30,7 +36,13 @@ def resolve_providers(config: dict) -> list:
         if pid in seen:
             continue
         seen.add(pid)
-        merged_config = config.get(pid, {})
+        merged_config = config.get(pid) or config.get(
+            next((k for k, v in CONFIG_KEY_MAP.items() if v == pid), ""), {}
+        ) or {}
+        if isinstance(merged_config, dict):
+            pass
+        else:
+            merged_config = {}
         provider = provider_def.factory(merged_config)
         active.append(provider)
 
@@ -38,7 +50,8 @@ def resolve_providers(config: dict) -> list:
         if pid not in seen:
             for p in REGISTRY:
                 if p.id == pid:
-                    provider = p.factory(config[pid] if isinstance(config[pid], dict) else {})
+                    raw = config.get(pid, {})
+                    provider = p.factory(raw if isinstance(raw, dict) else {})
                     active.append(provider)
                     break
     return active
