@@ -22,8 +22,12 @@ def render(providers: list[ProviderState]):
                 details = f"{p.unit}{sep}{p.remaining_quota:.2f} / {p.unit}{sep}{p.total_quota:.0f} remaining ({p.days_until_reset}d left)"
                 if p.daily_allowance is not None:
                     details += f"\nAllowance: {p.unit}{sep}{p.daily_allowance:.2f}/day"
-                if p.current_pace is not None:
-                    details += f"\nPace: {p.unit}{sep}{p.current_pace:.2f}/day"
+                    if p.status == "warning" and p.current_pace is not None:
+                        details += f"\n⚠️ Pace {p.unit}{sep}{p.current_pace:.2f}/day — slow to {p.unit}{sep}{p.daily_allowance:.2f}/day"
+                    elif p.current_pace is not None:
+                        details += f"\n✅ Pace {p.unit}{sep}{p.current_pace:.2f}/day — on track"
+                    else:
+                        details += f"\n✅ {p.unit}{sep}{p.daily_allowance:.2f}/day keeps you through the month"
             else:
                 details = "No data"
         else:
@@ -38,6 +42,10 @@ def render(providers: list[ProviderState]):
 
         for w in p.windows:
             w_details = f"{w.label}: {w.pct_used:.0f}% used" if w.pct_used is not None else f"{w.label}: N/A"
+            if w.pct_used is not None and w.pct_used >= 100:
+                w_details += " 🔴 limit reached"
+            elif w.pct_used is not None and w.pct_used >= 80:
+                w_details += " ⚠️ almost full"
             if w.resets_in:
                 w_details += f" · resets {w.resets_in}"
             table.add_row("", "", w_details)
