@@ -14,13 +14,19 @@ def render(providers: list[ProviderState]):
     for p in providers:
         status_style = {"ok": "green", "warning": "yellow", "critical": "red"}.get(p.status, "white")
         if p.provider_type == "budget":
-            details = f"${p.remaining_quota:.2f} / ${p.total_quota:.0f} remaining ({p.days_until_reset}d left)"
-            if p.daily_allowance is not None:
-                details += f"\nAllowance: {p.unit}{p.daily_allowance:.2f}/day"
-            if p.current_pace is not None:
-                details += f"\nPace: {p.unit}{p.current_pace:.2f}/day"
+            if p.remaining_quota is not None and p.total_quota is not None and p.days_until_reset is not None:
+                details = f"${p.remaining_quota:.2f} / ${p.total_quota:.0f} remaining ({p.days_until_reset}d left)"
+                if p.daily_allowance is not None:
+                    details += f"\nAllowance: {p.unit}{p.daily_allowance:.2f}/day"
+                if p.current_pace is not None:
+                    details += f"\nPace: {p.unit}{p.current_pace:.2f}/day"
+            else:
+                details = "No data"
         else:
-            details = f"Window: {p.window_pct_used:.0f}% used"
+            if p.window_pct_used is not None:
+                details = f"Window: {p.window_pct_used:.0f}% used"
+            else:
+                details = "Window: N/A"
             if p.window_resets_in:
                 details += f"\nResets: {p.window_resets_in}"
 
