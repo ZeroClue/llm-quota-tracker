@@ -1,41 +1,34 @@
-from datetime import date, datetime
+import requests
+from bs4 import BeautifulSoup
 from providers.base import BaseProvider, ProviderState
 
 
-MONTHLY_BUDGET = 60.0
+OPENCODE_GO_URL = "https://opencode.ai/workspace/{workspace_id}/go"
 
 
 class OpenCodeProvider(BaseProvider):
-    def __init__(self, billing_cycle_start: str):
-        self.billing_cycle_start = datetime.strptime(billing_cycle_start, "%Y-%m-%d").date()
+    def __init__(self, workspace_id: str, auth_cookie: str):
+        self.workspace_id = workspace_id
+        self.auth_cookie = auth_cookie
 
     def fetch(self) -> ProviderState:
-        today = date.today()
-        days_until_reset = (self._next_billing_date() - today).days
-        state = ProviderState(
-            name="OpenCode Go",
-            provider_type="budget",
-            total_quota=MONTHLY_BUDGET,
-            days_until_reset=days_until_reset,
-        )
+        state = ProviderState(name="OpenCode Go", provider_type="budget")
         try:
-            remaining = float(input("Enter OpenCode remaining $ balance: "))
-            state.remaining_quota = remaining
-        except (ValueError, EOFError):
+            resp = requests.get(
+                OPENCODE_GO_URL.format(workspace_id=self.workspace_id),
+                headers={"Cookie": f"auth={self.auth_cookie}"},
+                timeout=15,
+            )
+            resp.raise_for_status()
+            soup = BeautifulSoup(resp.text, "html.parser")
+            text = soup.get_text()
+
+            import re
+            monthly_match = re.search(r'monthly.*?(\d+(?:\.\d+)?)\s*%', text, re.I)
+            if monthly_match:
+                pct_used = float(monthly_match.group(1))
+                state.remaining_quota = 100.0 - pct_used
+                state.total_quota = 100.0
+        except requests.RequestException:
             state.status = "critical"
         return state
-
-    def _next_billing_date(self) -> date:
-        today = date.today()
-        year, month = today.year, today.month
-        if today.day >= self.billing_cycle_start.day:
-            month += 1
-        if month > 12:
-            year += 1
-            month = 1
-        try:
-            return date(year, month, self.billing_cycle_start.day)
-        except ValueError:
-            import calendar
-            last_day = calendar.monthrange(year, month)[1]
-            return date(year, month, last_day)
