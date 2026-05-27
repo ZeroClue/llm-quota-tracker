@@ -1,5 +1,7 @@
 import os
 import shutil
+import json
+from pathlib import Path
 from typing import Callable
 from discovery import probe_path
 from providers.base import BaseProvider
@@ -35,13 +37,14 @@ register(
     pid="opencode_go",
     name="OpenCode Go",
     probe=lambda: (
-        os.environ.get("OPENCODE_GO_WORKSPACE_ID", "") != ""
-        and os.environ.get("OPENCODE_GO_AUTH_COOKIE", "") != ""
+        shutil.which("opencode") is not None
+        or os.environ.get("OPENCODE_GO_WORKSPACE_ID", "") != ""
     ),
     requires_auth=True,
 )(lambda config: __import__("providers.opencode", fromlist=["OpenCodeProvider"]).OpenCodeProvider(
-    config.get("workspace_id") or os.environ.get("OPENCODE_GO_WORKSPACE_ID", ""),
-    config.get("auth_cookie") or os.environ.get("OPENCODE_GO_AUTH_COOKIE", ""),
+    workspace_id=config.get("workspace_id") or os.environ.get("OPENCODE_GO_WORKSPACE_ID", ""),
+    auth_cookie=config.get("auth_cookie") or os.environ.get("OPENCODE_GO_AUTH_COOKIE", ""),
+    api_key=config.get("api_key") or "",
 ))
 
 register(
