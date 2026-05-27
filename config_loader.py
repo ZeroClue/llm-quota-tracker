@@ -15,3 +15,30 @@ def load_config() -> dict:
         return {}
     with open(path) as f:
         return yaml.safe_load(f) or {}
+
+
+def resolve_providers(config: dict) -> list:
+    from registry import REGISTRY
+
+    from discovery import scan
+    discovered = {p.id: p for p in scan()}
+    configured = set(config.keys())
+
+    active = []
+    seen = set()
+    for pid, provider_def in discovered.items():
+        if pid in seen:
+            continue
+        seen.add(pid)
+        merged_config = config.get(pid, {})
+        provider = provider_def.factory(merged_config)
+        active.append(provider)
+
+    for pid in configured:
+        if pid not in seen:
+            for p in REGISTRY:
+                if p.id == pid:
+                    provider = p.factory(config[pid] if isinstance(config[pid], dict) else {})
+                    active.append(provider)
+                    break
+    return active
