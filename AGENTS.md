@@ -29,7 +29,7 @@
 - **Data math**: `calculators.py` — daily allowance = remaining / days_until_reset; pace computed from day-over-day deltas
 - **State**: SQLite `history.db` in `~/.config/llm-tracker/` for daily snapshots (pace calculation)
 - **Config**: `config.yaml` (gitignored, user-local) holds optional credentials/cookies for providers that need them
-- **Data sources**: Claude via `claude` CLI JSON, OpenCode Go via dashboard scrape, Ollama via web scrape, Copilot/Cursor/OpenAI via credential-based API (stubs), Zai via manual/API
+- **Data sources**: Claude via `claude auth status` with `CLAUDE_CONFIG_DIR`, OpenCode Go via SolidJS hydration regex scrape, Ollama via `ollama.com/settings` scrape, Zai via `api.z.ai/api/monitor/usage/quota/limit` API, Copilot/Cursor/OpenAI via credential-based API (stubs)
 - **Claude multi-instance**: Scans `~/.claude*` directories, runs `claude auth status` with `CLAUDE_CONFIG_DIR` to detect logged-in instances. Falls back to OAuth usage API when credentials have a valid `accessToken`.
 - **Guiding principle**: Auto-detect first, config overrides second, no manual prompts
 ## OpenCode config
@@ -40,3 +40,4 @@
 ## Future ideas (resurface later)
 
 - **Copilot/Cursor/OpenAI real API integrations**: The stubs need the actual API endpoints and credential formats filled in. The shared auth helper (`_opencode_auth.py`) reads OpenCode's auth.json but the exact keys and endpoints need verification against opencode-quota's source.
+- **Multi-window display**: Many providers expose multiple quota windows (5-hour, weekly, monthly). The current `ProviderState` supports one window. A richer model would show all windows per provider, e.g. OpenCode Go rolling/weekly/monthly, Claude 5h/7d, Zai 5h/weekly/MCP.
