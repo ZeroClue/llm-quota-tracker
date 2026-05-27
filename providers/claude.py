@@ -69,14 +69,14 @@ class ClaudeProvider(BaseProvider):
 
                     used_pct = _parse_pct(five_hr)
                     if used_pct is not None:
-                        state.window_pct_used = 100.0 - used_pct
+                        state.window_pct_used = used_pct
                         state.window_resets_in = _fmt_reset(_parse_reset(five_hr))
 
                     seven_pct = _parse_pct(seven_day)
                     if seven_pct is not None:
                         state.windows.append(QuotaWindow(
                             label="7d",
-                            pct_used=100.0 - seven_pct,
+                            pct_used=seven_pct,
                             resets_in=_fmt_reset(_parse_reset(seven_day)),
                         ))
                     if used_pct is not None or seven_pct is not None:
