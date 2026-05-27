@@ -5,17 +5,18 @@ def calculate_budget(state: ProviderState, history: list[float]) -> ProviderStat
     if state.days_until_reset is None or state.remaining_quota is None or state.days_until_reset <= 0:
         return state
     flat = state.remaining_quota / state.days_until_reset
-    if history:
-        avg_daily_spend = sum(history[-7:]) / len(history[-7:])
-        state.current_pace = avg_daily_spend
-        projected_runout = state.remaining_quota / avg_daily_spend
-        if projected_runout < state.days_until_reset:
-            state.daily_allowance = flat * 0.8
-            state.status = "warning"
-        else:
-            state.daily_allowance = flat
-    else:
-        state.daily_allowance = flat
+    if len(history) >= 2:
+        recent = history[-7:]
+        diffs = [recent[i] - recent[i + 1] for i in range(len(recent) - 1) if recent[i] > recent[i + 1]]
+        if diffs:
+            avg_daily_spend = sum(diffs) / len(diffs)
+            state.current_pace = avg_daily_spend
+            projected_runout = state.remaining_quota / avg_daily_spend
+            if projected_runout < state.days_until_reset:
+                state.daily_allowance = flat * 0.8
+                state.status = "warning"
+                return state
+    state.daily_allowance = flat
     return state
 
 

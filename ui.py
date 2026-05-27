@@ -13,13 +13,14 @@ def render(providers: list[ProviderState]):
 
     for p in providers:
         status_style = {"ok": "green", "warning": "yellow", "critical": "red"}.get(p.status, "white")
+        sep = "" if p.unit in ("$", "%") else " "
         if p.provider_type == "budget":
             if p.remaining_quota is not None and p.total_quota is not None and p.days_until_reset is not None:
-                details = f"${p.remaining_quota:.2f} / ${p.total_quota:.0f} remaining ({p.days_until_reset}d left)"
+                details = f"{p.unit}{sep}{p.remaining_quota:.2f} / {p.unit}{sep}{p.total_quota:.0f} remaining ({p.days_until_reset}d left)"
                 if p.daily_allowance is not None:
-                    details += f"\nAllowance: {p.unit}{p.daily_allowance:.2f}/day"
+                    details += f"\nAllowance: {p.unit}{sep}{p.daily_allowance:.2f}/day"
                 if p.current_pace is not None:
-                    details += f"\nPace: {p.unit}{p.current_pace:.2f}/day"
+                    details += f"\nPace: {p.unit}{sep}{p.current_pace:.2f}/day"
             else:
                 details = "No data"
         else:
