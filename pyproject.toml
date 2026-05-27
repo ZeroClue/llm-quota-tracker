@@ -1,0 +1,26 @@
+[project]
+name = "llm-quota-tracker"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "beautifulsoup4>=4.14.3",
+    "pyyaml>=6.0.3",
+    "requests>=2.34.2",
+    "rich>=15.0.0",
+]
+
+[project.scripts]
+llm-tracker = "main:main"
+
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+py-modules = ["main", "calculators", "config_loader", "history", "ui"]
+packages.find = { include = ["providers*"] }
+
+[tool.uv]
+package = true
