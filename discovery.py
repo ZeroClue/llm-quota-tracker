@@ -1,7 +1,6 @@
 import shutil
 import os
 from pathlib import Path
-from registry import REGISTRY, ProviderDef
 
 
 def probe_which(binary: str) -> bool:
@@ -16,5 +15,6 @@ def probe_path(path: str) -> bool:
     return Path(path).expanduser().exists()
 
 
-def scan() -> list[ProviderDef]:
+def scan() -> list:
+    from registry import REGISTRY
     return [p for p in REGISTRY if p.probe()]
