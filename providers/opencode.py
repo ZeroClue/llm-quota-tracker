@@ -37,10 +37,12 @@ def _fmt_reset(secs: float) -> str:
 
 
 class OpenCodeProvider(BaseProvider):
-    def __init__(self, workspace_id: str = "", auth_cookie: str = "", api_key: str = ""):
+    def __init__(self, workspace_id: str = "", auth_cookie: str = "", api_key: str = "",
+                 monthly_budget: float = 60.0, weekly_budget: float = 30.0, rolling_budget: float = 12.0):
         self.workspace_id = workspace_id
         self.auth_cookie = auth_cookie
         self.api_key = api_key
+        self.budgets = {"monthlyUsage": monthly_budget, "weeklyUsage": weekly_budget, "rollingUsage": rolling_budget}
 
     def fetch(self) -> ProviderState:
         if not self.auth_cookie or not self.workspace_id:
@@ -63,14 +65,19 @@ class OpenCodeProvider(BaseProvider):
             if monthly:
                 pct_used = monthly["usagePercent"]
                 reset_sec = monthly["resetInSec"]
-                state = ProviderState(name="OpenCode Go", provider_type="budget", unit="%")
-                state.remaining_quota = 100.0 - pct_used
-                state.total_quota = 100.0
+                monthly_budget = self.budgets["monthlyUsage"]
+                remaining_dollars = monthly_budget * (100.0 - pct_used) / 100.0
+                state = ProviderState(name="OpenCode Go", provider_type="budget", unit="$")
+                state.remaining_quota = remaining_dollars
+                state.total_quota = monthly_budget
                 state.days_until_reset = max(1, int(reset_sec / 86400))
 
-                for key, label in [("rollingUsage", "Rolling"), ("weeklyUsage", "Weekly")]:
+                for key, label in [("rollingUsage", "5h"), ("weeklyUsage", "Weekly")]:
                     w = raw.get(key)
                     if w:
+                        budget = self.budgets.get(key, 0)
+                        used = budget * w["usagePercent"] / 100.0
+                        remaining = budget - used
                         state.windows.append(QuotaWindow(
                             label=label,
                             pct_used=w["usagePercent"],

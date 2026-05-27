@@ -71,7 +71,6 @@ class ClaudeProvider(BaseProvider):
                         return state
 
             state.status = "ok"
-            state.window_pct_used = 0.0
             state.window_resets_in = f"plan: {sub}"
             return state
 
