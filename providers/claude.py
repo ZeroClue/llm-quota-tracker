@@ -1,8 +1,9 @@
 import subprocess
 import json
 import os
+import time
 from pathlib import Path
-from providers.base import BaseProvider, ProviderState
+from providers.base import BaseProvider, ProviderState, QuotaWindow
 
 
 ANTHROPIC_USAGE_URL = "https://api.anthropic.com/api/oauth/usage"
@@ -64,10 +65,21 @@ class ClaudeProvider(BaseProvider):
                 if usage:
                     root = usage.get("quota") or usage.get("usage") or usage.get("oauth_usage") or usage
                     five_hr = root.get("five_hour") or root.get("fiveHour") or {}
+                    seven_day = root.get("seven_day") or root.get("sevenDay") or {}
+
                     used_pct = _parse_pct(five_hr)
                     if used_pct is not None:
                         state.window_pct_used = 100.0 - used_pct
-                        state.window_resets_in = _parse_reset(five_hr)
+                        state.window_resets_in = _fmt_reset(_parse_reset(five_hr))
+
+                    seven_pct = _parse_pct(seven_day)
+                    if seven_pct is not None:
+                        state.windows.append(QuotaWindow(
+                            label="7d",
+                            pct_used=100.0 - seven_pct,
+                            resets_in=_fmt_reset(_parse_reset(seven_day)),
+                        ))
+                    if used_pct is not None or seven_pct is not None:
                         return state
 
             state.status = "ok"
@@ -113,9 +125,25 @@ def _parse_pct(window: dict) -> float | None:
     return None
 
 
-def _parse_reset(window: dict) -> str | None:
+def _parse_reset(window: dict) -> float | None:
     for key in ("resets_at", "resetsAt", "reset_at", "resetAt"):
         val = window.get(key)
         if val:
-            return str(val)
+            try:
+                parsed = time.mktime(time.strptime(val[:19], "%Y-%m-%dT%H:%M:%S"))
+                return parsed
+            except (ValueError, OSError):
+                pass
     return None
+
+
+def _fmt_reset(ts: float | None) -> str | None:
+    if ts is None:
+        return None
+    secs = max(0, int(ts - time.time()))
+    if secs >= 86400:
+        return f"{secs // 86400}d"
+    elif secs >= 3600:
+        return f"{secs // 3600}h {(secs % 3600) // 60}m"
+    else:
+        return f"{secs // 60}m"
