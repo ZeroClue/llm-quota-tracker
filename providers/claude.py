@@ -126,13 +126,14 @@ def _parse_pct(window: dict) -> float | None:
 
 
 def _parse_reset(window: dict) -> float | None:
+    from datetime import datetime, timezone
     for key in ("resets_at", "resetsAt", "reset_at", "resetAt"):
         val = window.get(key)
         if val:
             try:
-                parsed = time.mktime(time.strptime(val[:19], "%Y-%m-%dT%H:%M:%S"))
-                return parsed
-            except (ValueError, OSError):
+                dt = datetime.fromisoformat(val.replace("Z", "+00:00"))
+                return dt.timestamp()
+            except (ValueError, TypeError):
                 pass
     return None
 
@@ -142,7 +143,8 @@ def _fmt_reset(ts: float | None) -> str | None:
         return None
     secs = max(0, int(ts - time.time()))
     if secs >= 86400:
-        return f"{secs // 86400}d"
+        days = (secs + 43200) // 86400
+        return f"{days}d"
     elif secs >= 3600:
         return f"{secs // 3600}h {(secs % 3600) // 60}m"
     else:
