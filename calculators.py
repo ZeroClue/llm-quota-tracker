@@ -26,4 +26,10 @@ def calculate_burst(state: ProviderState) -> ProviderState:
             state.status = "critical"
         elif state.window_pct_used > 60:
             state.status = "warning"
+    for w in state.windows:
+        if w.pct_used is not None:
+            if w.pct_used > 80 and state.status != "critical":
+                state.status = "critical"
+            elif w.pct_used > 60 and state.status == "ok":
+                state.status = "warning"
     return state
