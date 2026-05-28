@@ -40,7 +40,7 @@ def render(providers: list[ProviderState]):
 
         table = Table(title=section_label, box=box.ROUNDED, show_header=False)
         table.add_column("Provider", style="cyan", no_wrap=True)
-        table.add_column("Status", style="bold", width=10)
+        table.add_column("Status", style="bold", width=8)
         table.add_column("Details")
 
         for p in section:
@@ -65,18 +65,21 @@ def render(providers: list[ProviderState]):
             else:
                 t = Text("")
                 if p.window_pct_used is not None:
+                    label = p.window_label or "Window"
+                    t.append(f"{label} ")
                     t.append(bar_text(p.window_pct_used))
                     t.append(f" {p.window_pct_used:.0f}% used")
                 else:
                     t = Text("Window: N/A")
                 if p.window_resets_in:
-                    t.append(f"  resets {p.window_resets_in}")
+                    t.append(f" resets {p.window_resets_in}")
 
             table.add_row(p.name, f"[{status_style}]{p.status}[/{status_style}]", details if section_type == "budget" else t)
 
             for w in p.windows:
                 wt = Text("")
                 if w.pct_used is not None:
+                    wt.append(f"{w.label} ")
                     wt.append(bar_text(w.pct_used))
                     wt.append(f" {w.pct_used:.0f}% used")
                     if w.pct_used >= 100:

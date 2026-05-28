@@ -53,6 +53,7 @@ class ZaiProvider(BaseProvider):
 
                 if label == "5h":
                     state.window_pct_used = pct
+                    state.window_label = "5h"
                     state.window_resets_in = resets_in
                 else:
                     state.windows.append(QuotaWindow(label=label, pct_used=pct, resets_in=resets_in))

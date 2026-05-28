@@ -24,6 +24,7 @@ class ProviderState:
     # Burst fields
     window_pct_used: Optional[float] = None
     window_resets_in: Optional[str] = None
+    window_label: str = ""  # e.g. "5h", "Session", "7d"
 
     # Additional windows (multi-window display)
     windows: list[QuotaWindow] = field(default_factory=list)

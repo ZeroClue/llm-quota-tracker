@@ -57,6 +57,7 @@ class OllamaProvider(BaseProvider):
             for w in windows:
                 if w["label"] == "Session":
                     state.window_pct_used = w["pct"]
+                    state.window_label = "Session"
                     state.window_resets_in = w["reset"]
                 elif w["label"] == "Weekly":
                     state.windows.append(QuotaWindow(

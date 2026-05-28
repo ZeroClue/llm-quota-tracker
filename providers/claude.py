@@ -70,6 +70,7 @@ class ClaudeProvider(BaseProvider):
                     used_pct = _parse_pct(five_hr)
                     if used_pct is not None:
                         state.window_pct_used = used_pct
+                        state.window_label = "5h"
                         state.window_resets_in = _fmt_reset(_parse_reset(five_hr))
 
                     seven_pct = _parse_pct(seven_day)
