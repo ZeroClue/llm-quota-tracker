@@ -60,7 +60,7 @@ uv tool upgrade llm-quota-tracker
 uv run llm-tracker
 ```
 
-![Dashboard preview](docs/images/capture.png)
+![Dashboard preview](docs/images/Capture.PNG)
 
 Providers are auto-detected. Claude and OpenCode Go appear automatically if installed. Configure credentials for others in `~/.config/llm-tracker/config.yaml`:
 
