@@ -23,7 +23,9 @@ def render(providers: list[ProviderState]):
     if counts["needs-auth"]:
         parts.append(f"[white]⚪ {counts['needs-auth']} needs auth[/white]")
     if parts:
-        console.print("  ".join(parts))
+        console.print()
+        console.print()
+        console.print(" ".join(parts), justify="center")
         console.print()
 
     def bar_text(pct: float | None, width: int = 12) -> Text:
