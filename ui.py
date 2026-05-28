@@ -65,21 +65,21 @@ def render(providers: list[ProviderState]):
             else:
                 t = Text("")
                 if p.window_pct_used is not None:
-                    label = p.window_label or "Window"
-                    t.append(f"{label} ")
+                    label = (p.window_label or "Window").ljust(4)
+                    t.append(label)
                     t.append(bar_text(p.window_pct_used))
                     t.append(f" {p.window_pct_used:.0f}% used")
                 else:
                     t = Text("Window: N/A")
                 if p.window_resets_in:
-                    t.append(f" resets {p.window_resets_in}")
+                    t.append(f" → {p.window_resets_in}")
 
             table.add_row(p.name, f"[{status_style}]{p.status}[/{status_style}]", details if section_type == "budget" else t)
 
             for w in p.windows:
                 wt = Text("")
                 if w.pct_used is not None:
-                    wt.append(f"{w.label} ")
+                    wt.append(w.label.ljust(4))
                     wt.append(bar_text(w.pct_used))
                     wt.append(f" {w.pct_used:.0f}% used")
                     if w.pct_used >= 100:
@@ -87,7 +87,7 @@ def render(providers: list[ProviderState]):
                 else:
                     wt = Text(f"{w.label}: N/A")
                 if w.resets_in:
-                    wt.append(f"  resets {w.resets_in}")
+                    wt.append(f" → {w.resets_in}")
                 table.add_row("", "", wt)
 
         console.print(table)

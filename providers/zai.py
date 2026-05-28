@@ -5,7 +5,7 @@ from providers.base import BaseProvider, ProviderState, QuotaWindow
 
 ZAI_QUOTA_URL = "https://api.z.ai/api/monitor/usage/quota/limit"
 
-WINDOW_LABELS = {(3, "TOKENS_LIMIT"): "5h", (6, "TOKENS_LIMIT"): "Weekly", (5, "TIME_LIMIT"): "MCP"}
+WINDOW_LABELS = {(3, "TOKENS_LIMIT"): "5h", (6, "TOKENS_LIMIT"): "7d", (5, "TIME_LIMIT"): "MCP"}
 
 
 class ZaiProvider(BaseProvider):

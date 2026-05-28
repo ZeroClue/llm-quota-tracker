@@ -72,7 +72,7 @@ class OpenCodeProvider(BaseProvider):
                 state.total_quota = monthly_budget
                 state.days_until_reset = max(1, int(reset_sec / 86400))
 
-                for key, label in [("rollingUsage", "5h"), ("weeklyUsage", "Weekly")]:
+                for key, label in [("rollingUsage", "5h"), ("weeklyUsage", "7d")]:
                     w = raw.get(key)
                     if w:
                         budget = self.budgets.get(key, 0)
