@@ -92,5 +92,5 @@ def render(providers: list[ProviderState]):
                     wt.append(f" → {w.resets_in}")
                 table.add_row("", "", wt)
 
-        console.print(table)
+        console.print(table, justify="center")
         console.print()
