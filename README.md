@@ -27,10 +27,25 @@ This tool was built with and runs on [OpenCode](https://opencode.ai/go?ref=JAFCG
 
 ## Installation
 
+### Quick install (recommended)
+
+```bash
+uv tool install git+https://github.com/ZeroClue/llm-quota-tracker.git
+```
+
+Then run from anywhere:
+
+```bash
+llm-tracker
+```
+
+### Or clone and run
+
 ```bash
 git clone https://github.com/ZeroClue/llm-quota-tracker.git
 cd llm-quota-tracker
 uv sync
+uv run llm-tracker
 ```
 
 ## Usage
