@@ -4,15 +4,21 @@ A terminal dashboard that auto-discovers your AI coding tools and shows all your
 
 Supports Claude Code Pro, OpenCode Go, Ollama Cloud Pro, Zai GLM, and extensible to more.
 
+[Powered by OpenCode](https://opencode.ai/go?ref=JAFCG08A7T)
+
 ## Features
 
 - **Auto-discovery** — detects installed tools via `which`, known paths, and credential files
-- **Unified dashboard** — single `rich` table showing all providers with color-coded status
-- **Multi-window display** — each provider shows all its quota windows (5h, weekly, monthly, MCP)
+- **Unified dashboard** — color-coded tables with progress bars, sectioned by budget/burst
+- **Multi-window display** — each provider shows all its quota windows (5h, 7d, monthly, MCP)
 - **Daily allowance** — remaining ÷ days until reset tells you your safe daily spend
 - **Pace tracking** — SQLite history tracks day-over-day usage, warns on overspend
 - **No manual prompts** — missing credentials show "needs auth" gracefully
 - **No cloud dependencies** — all state lives in `~/.config/llm-tracker/`
+
+## Try OpenCode
+
+This tool was built with and runs on [OpenCode](https://opencode.ai/go?ref=JAFCG08A7T), the open-source AI coding agent.
 
 ## Requirements
 
@@ -61,14 +67,12 @@ zai_glm:
 
 ## Supported Providers
 
-All providers show their quota windows when configured:
-
-| Provider | Windows | Plan |
-|----------|---------|------|
-| Claude Code | 5h + 7d | Pro detected via OAuth |
-| OpenCode Go | 5h + Weekly + Monthly | $60/mo budget (configurable) |
-| Ollama Cloud Pro | Session + Weekly | Cloud Pro |
-| Zai GLM | 5h + Weekly + MCP | Pro via API |
+| Provider | Windows | Plan detection |
+|----------|---------|---------------|
+| Claude Code | 5h + 7d | Pro via OAuth |
+| OpenCode Go | 5h + 7d + Monthly | $60/mo budget (configurable) |
+| Ollama Cloud Pro | 5h + 7d | Cloud Pro |
+| Zai GLM | 5h + 7d + MCP | Pro via API |
 
 ## Architecture
 
@@ -86,7 +90,14 @@ history.py          — SQLite daily snapshots for pace
 ui.py               — Rich table with color-coded status + guidance
 ```
 
-Status colors: green (on track), yellow (over pace), red (critical / limit reached).
+## Attributions
+
+This project builds on ideas from several excellent open-source tools:
+
+- **[opencode-quota](https://github.com/slkiser/opencode-quota)** by slkiser — SolidJS hydration regex scraping, provider pattern, Anthropic OAuth usage API approach
+- **[tokscale](https://github.com/junhoyeo/tokscale)** by junhoyeo — Tool discovery and scanning concept, multi-platform data sources
+- **[ccusage](https://github.com/ryoppippi/ccusage)** by ryoppippi — Claude Code data sources and CLI integration
+- **[OpenCode](https://opencode.ai/go?ref=JAFCG08A7T)** — The open-source AI coding agent this project is built with and for
 
 ## Development
 

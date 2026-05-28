@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.2.0] - 2026-05-27
+
+### Changed
+- Dashboard now split into Budget and Burst sections with column headers
+- Progress bars using Unicode blocks, color-coded green/yellow/red
+- Fixed-width padding for aligned bars across all providers
+- Consistent window labels: 5h, 7d, M, MCP
+- Centered health summary with count breakdown
+- Spinner with status messages during data fetching
+- Standardized column widths across tables
+- README with attributions and referral link
+
+### Fixed
+- Claude OAuth token timezone parsing (was off by 2h)
+- Ollama multi-line usage parsing (session + weekly)
+- OpenCode Go SolidJS hydration regex for all three windows
+- Config key aliasing for zai_glm → zai, ollama_cloud → ollama
+- Factory lambda double-nesting bug (config was silently lost)
+- Calculator history pace computation (day-over-day deltas, not raw averages)
+- py-modules missing registry and discovery
+
 ## [0.1.0] - 2026-05-27
 
 ### Added
