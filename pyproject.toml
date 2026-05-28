@@ -1,6 +1,6 @@
 [project]
 name = "llm-quota-tracker"
-version = "0.2.0"
+version = "0.2.1"
 description = "Terminal dashboard that auto-discovers your AI coding tools and shows all your quotas, daily allowances, and usage windows in one place."
 readme = "README.md"
 requires-python = ">=3.11"

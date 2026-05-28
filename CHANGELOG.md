@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.1] - 2026-05-27
+
+### Fixed
+- Sub-window percentage >80% now correctly sets provider status to critical (Zai weekly at 100% was showing as "ok")
+- Health summary counts now reflect sub-window states
+
 ## [0.2.0] - 2026-05-27
 
 ### Changed
