@@ -48,31 +48,19 @@ uv sync
 uv run llm-tracker
 ```
 
+### Upgrade
+
+```bash
+uv tool upgrade llm-quota-tracker
+```
+
 ## Usage
 
 ```bash
 uv run llm-tracker
 ```
 
-```
-🟢 4 healthy
-
- Budget                         Burst
-╭──────────────┬──────┬────────╮ ╭────────────────┬──────┬─────────────────╮
-│ Provider     │Status│ Details│ │ Provider       │Status│ Details         │
-├──────────────┼──────┼────────┤ ├────────────────┼──────┼─────────────────┤
-│ OpenCode Go  │ ok   │ $53.40 │ │ Claude (-pro)  │ ok   │ 5h ███░░░░░░░░░ │
-│              │      │ /$60   │ │                │      │ 29% → 3h 46m    │
-│              │      │ 1.84/d │ │                │      │ 7d ░░░░░░░░░░░░ │
-│              │      │ 5h ░░  │ │ Ollama Pro     │ ok   │ 5h █░░░░░░░░░░░ │
-│              │      │ 7d ██  │ │                │      │ 12% → 2h        │
-│              │      │ M █░   │ │                │      │ 7d █████░░░░░░░ │
-│              │      │        │ │ Zai GLM        │ ok   │ 5h ░░░░░░░░░░░░ │
-│              │      │        │ │                │      │ 7d ████████████ │
-│              │      │        │ │                │      │ 100% 🔴 max 2d  │
-│              │      │        │ │                │      │ MCP ░░░░░░░░░░░░│
-╰──────────────┴──────┴────────╯ ╰────────────────┴──────┴─────────────────╯
-```
+![Dashboard preview](docs/images/capture.png)
 
 Providers are auto-detected. Claude and OpenCode Go appear automatically if installed. Configure credentials for others in `~/.config/llm-tracker/config.yaml`:
 
