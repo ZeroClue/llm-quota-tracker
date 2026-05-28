@@ -39,7 +39,7 @@ def render(providers: list[ProviderState]):
             continue
 
         table = Table(box=box.ROUNDED, show_header=True, title=section_label, min_width=60)
-        table.add_column("Provider", style="cyan", no_wrap=True)
+        table.add_column("Provider", style="cyan", no_wrap=True, width=20)
         table.add_column("Status", style="bold", width=10)
         table.add_column("Details")
 
