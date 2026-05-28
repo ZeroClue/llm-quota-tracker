@@ -38,7 +38,7 @@ def render(providers: list[ProviderState]):
         if not section:
             continue
 
-        table = Table(title=section_label, box=box.ROUNDED, show_header=False)
+        table = Table(box=box.ROUNDED, show_header=True, title=section_label, min_width=60)
         table.add_column("Provider", style="cyan", no_wrap=True)
         table.add_column("Status", style="bold", width=10)
         table.add_column("Details")
@@ -56,10 +56,10 @@ def render(providers: list[ProviderState]):
                     details = f"{p.unit}{sep}{p.remaining_quota:.2f} / {p.unit}{sep}{p.total_quota:.0f} ({p.days_until_reset}d)"
                     if p.daily_allowance is not None:
                         details += f"\nAllowance: {p.unit}{sep}{p.daily_allowance:.2f}/day"
-                        if p.current_pace is not None:
-                            details += f"  Pace: {p.unit}{sep}{p.current_pace:.2f}/day"
-                        elif p.status == "ok":
-                            details += "  ✅"
+                    if p.current_pace is not None:
+                        details += f"  Pace: {p.unit}{sep}{p.current_pace:.2f}/day"
+                    elif p.status == "ok":
+                        details += "  ✅"
                 else:
                     details = "No data"
             else:
@@ -70,7 +70,7 @@ def render(providers: list[ProviderState]):
                     t.append(bar_text(p.window_pct_used))
                     t.append(f" {p.window_pct_used:.0f}% used")
                 else:
-                    t = Text("Window: N/A")
+                    t = Text("—")
                 if p.window_resets_in:
                     t.append(f" → {p.window_resets_in}")
 
@@ -85,7 +85,7 @@ def render(providers: list[ProviderState]):
                     if w.pct_used >= 100:
                         wt.append(" 🔴 max", style="red")
                 else:
-                    wt = Text(f"{w.label}: N/A")
+                    wt = Text(f"{w.label}: —")
                 if w.resets_in:
                     wt.append(f" → {w.resets_in}")
                 table.add_row("", "", wt)

@@ -72,6 +72,12 @@ class OpenCodeProvider(BaseProvider):
                 state.total_quota = monthly_budget
                 state.days_until_reset = max(1, int(reset_sec / 86400))
 
+                state.windows.append(QuotaWindow(
+                    label="M",
+                    pct_used=pct_used,
+                    resets_in=_fmt_reset(reset_sec),
+                ))
+
                 for key, label in [("rollingUsage", "5h"), ("weeklyUsage", "7d")]:
                     w = raw.get(key)
                     if w:
