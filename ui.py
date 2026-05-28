@@ -38,9 +38,9 @@ def render(providers: list[ProviderState]):
         if not section:
             continue
 
-        table = Table(box=box.ROUNDED, show_header=True, title=section_label, min_width=60)
+        table = Table(box=box.ROUNDED, show_header=True, title=section_label)
         table.add_column("Provider", style="cyan", no_wrap=True, width=20)
-        table.add_column("Status", style="bold", width=10)
+        table.add_column("Status", style="bold", width=8)
         table.add_column("Details")
 
         for p in section:
