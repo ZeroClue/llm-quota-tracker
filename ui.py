@@ -26,7 +26,7 @@ def render(providers: list[ProviderState]):
         console.print("  ".join(parts))
         console.print()
 
-    def bar_text(pct: float | None, width: int = 20) -> Text:
+    def bar_text(pct: float | None, width: int = 12) -> Text:
         if pct is None:
             return Text("")
         filled = int(width * min(pct / 100.0, 1.0))
@@ -40,7 +40,7 @@ def render(providers: list[ProviderState]):
 
         table = Table(title=section_label, box=box.ROUNDED, show_header=False)
         table.add_column("Provider", style="cyan", no_wrap=True)
-        table.add_column("Status", style="bold", width=8)
+        table.add_column("Status", style="bold", width=10)
         table.add_column("Details")
 
         for p in section:
@@ -83,7 +83,7 @@ def render(providers: list[ProviderState]):
                     wt.append(bar_text(w.pct_used))
                     wt.append(f" {w.pct_used:.0f}% used")
                     if w.pct_used >= 100:
-                        wt.append(" 🔴 limit reached", style="red")
+                        wt.append(" 🔴 max", style="red")
                 else:
                     wt = Text(f"{w.label}: N/A")
                 if w.resets_in:
