@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.0] - 2026-05-28
+
+### Added
+- `--help` flag with usage, options, and referral link
+- `--json` flag for machine-readable provider data output
+- `--setup` interactive configuration wizard with credential validation
+- `setup_wizard.py` — per-provider instructions, input validation, retry logic
+
 ## [0.2.1] - 2026-05-27
 
 ### Fixed
