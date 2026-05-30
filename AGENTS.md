@@ -17,7 +17,8 @@
 - **History**: `history.py` — SQLite daily snapshots in `~/.config/llm-tracker/history.db`
 - **TUI**: `ui.py` — rich table with color-coded status + "needs auth" for undetected providers
 - **Shared auth**: `providers/_opencode_auth.py` — reads OpenCode's OAuth credentials for Copilot/OpenAI
-- **Entrypoint**: `uv run llm-tracker` or `uv run python main.py`
+- **Entrypoint**: `uv run llm-tracker` or `uv run python main.py`. `--help`, `--json`, `--setup` flags available.
+- **Setup wizard**: `--setup` walks through credential collection with validation (Ollama cookie, OpenCode workspace_id + auth, Zai API key).
 - **No lint/test/typecheck infra yet**
 
 ## Architecture
@@ -40,4 +41,3 @@
 ## Future ideas (resurface later)
 
 - **Copilot/Cursor/OpenAI real API integrations**: The stubs need the actual API endpoints and credential formats filled in. The shared auth helper (`_opencode_auth.py`) reads OpenCode's auth.json but the exact keys and endpoints need verification against opencode-quota's source.
-- **Multi-window display**: Many providers expose multiple quota windows (5-hour, weekly, monthly). The current `ProviderState` supports one window. A richer model would show all windows per provider, e.g. OpenCode Go rolling/weekly/monthly, Claude 5h/7d, Zai 5h/weekly/MCP.

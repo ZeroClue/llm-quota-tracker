@@ -57,12 +57,15 @@ uv tool upgrade llm-quota-tracker
 ## Usage
 
 ```bash
-uv run llm-tracker
+llm-tracker          # Interactive dashboard
+llm-tracker --help   # Usage and options
+llm-tracker --json   # Machine-readable JSON output
+llm-tracker --setup  # Interactive configuration wizard
 ```
 
 ![Dashboard preview](docs/images/Capture.PNG)
 
-Providers are auto-detected. Claude and OpenCode Go appear automatically if installed. Configure credentials for others in `~/.config/llm-tracker/config.yaml`:
+Providers are auto-detected. Claude and OpenCode Go appear automatically if installed. Run `llm-tracker --setup` for a guided configuration walkthrough, or manually configure credentials in `~/.config/llm-tracker/config.yaml`:
 
 ```yaml
 # OpenCode Go — get workspace_id and auth_cookie from browser DevTools
@@ -111,7 +114,17 @@ providers/zai.py    — Zai GLM (REST API)
 calculators.py      — calculate_budget() + calculate_burst()
 history.py          — SQLite daily snapshots for pace
 ui.py               — Rich table with color-coded status + guidance
+setup_wizard.py     — Interactive --setup with validation
 ```
+
+## CLI Options
+
+| Flag | Description |
+|------|-------------|
+| `(none)` | Launch interactive dashboard |
+| `--help` | Show usage and exit |
+| `--json` | Output provider data as JSON (machine-readable) |
+| `--setup` | Guided configuration wizard with validation |
 
 ## Attributions
 
